@@ -36,6 +36,10 @@ const windowIcon = nativeImage.createFromDataURL(windowIconAsset);
  * Create the main application window
  */
 export function createMainWindow() {
+  // (CLI arg --hidden or config)
+  const startHidden =
+    app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
+
   // create the window
   mainWindow = new BrowserWindow({
     minWidth: 300,
@@ -45,6 +49,7 @@ export function createMainWindow() {
     backgroundColor: "#191919",
     frame: !config.customFrame,
     icon: windowIcon,
+    show: !startHidden,
     webPreferences: {
       // relative to `.vite/build`
       preload: join(__dirname, "preload.js"),
@@ -56,11 +61,6 @@ export function createMainWindow() {
 
   // hide the options
   mainWindow.setMenu(null);
-
-  // maximise the window if it was maximised before
-  if (config.windowState.isMaximised) {
-    mainWindow.maximize();
-  }
 
   // restore last position if it was moved previously
   if (config.windowState.x > 0 || config.windowState.y > 0) {
@@ -76,6 +76,11 @@ export function createMainWindow() {
       config.windowState.width ?? 1280,
       config.windowState.height ?? 720,
     );
+  }
+
+  // maximise the window if it was maximised before
+  if (config.windowState.isMaximised) {
+    mainWindow.maximize();
   }
 
   // load the entrypoint
