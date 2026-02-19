@@ -176,8 +176,8 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: {
-        owner: "stoatchat",
-        name: "for-desktop",
+        owner: "bundle-o-cells",
+        name: "stoat-for-desktop",
       },
     }),
   ],
