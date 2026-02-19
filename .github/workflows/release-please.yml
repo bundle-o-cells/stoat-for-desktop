@@ -25,6 +25,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
+          target-branch: dev
 
   publish-release:
     name: Publish App
