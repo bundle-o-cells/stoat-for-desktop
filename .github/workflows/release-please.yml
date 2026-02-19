@@ -2,13 +2,12 @@ name: Release Please
 
 on:
   push:
-    branches: [main] # updates/opens the release PR when commits land on main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
 
 concurrency:
   group: release-please
@@ -21,15 +20,10 @@ jobs:
     outputs:
       release_created: ${{ steps.rp.outputs.release_created }}
     steps:
-      - id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.GH_STOAT_RELEASE_APP_ID }}
-          private-key: ${{ secrets.GH_STOAT_RELEASE_APP_PRIVATE_KEY }}
       - id: rp
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
 
   publish-release:
@@ -44,7 +38,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,11 +61,11 @@ jobs:
         run: pnpm install
 
       - name: Publish
-        run: |
-          pnpm run publish
+        run: pnpm run publish
         env:
           PLATFORM: ${{ matrix.os }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
 
       - name: Publish macOS x64
         if: matrix.os == 'macos-latest'
@@ -79,6 +73,7 @@ jobs:
         env:
           PLATFORM: ${{ matrix.os }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
 
       - name: Publish Linux arm64
         if: matrix.os == 'ubuntu-latest'
@@ -86,3 +81,4 @@ jobs:
         env:
           PLATFORM: ${{ matrix.os }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}

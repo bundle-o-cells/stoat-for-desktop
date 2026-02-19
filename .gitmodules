@@ -1,4 +1,4 @@
 [submodule "assets"]
-	path = assets
-	url = https://github.com/stoatchat/assets
-	update = none
+  path = assets
+  url = https://github.com/bundle-o-cells/stoat-desktop-assets
+  update = none
