@@ -35,5 +35,6 @@ jobs:
       - name: Publish
         run: pnpm run publish
         env:
+          PLATFORM: ${{ matrix.os }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
