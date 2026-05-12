@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/bundle-o-cells/stoat-for-desktop/compare/v1.4.0...v1.4.1) (2026-05-12)
+
+
+### Bug Fixes
+
+* **flatpak:** change screenshot path into an url in the metainfo file ([#195](https://github.com/bundle-o-cells/stoat-for-desktop/issues/195)) ([74c941e](https://github.com/bundle-o-cells/stoat-for-desktop/commit/74c941e5b83cd14ddecb74150d5a1d08c143278b))
+
 ## [1.4.0](https://github.com/bundle-o-cells/stoat-for-desktop/compare/v1.3.0...v1.4.0) (2026-02-19)
 
 
