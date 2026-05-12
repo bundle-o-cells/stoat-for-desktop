@@ -32,9 +32,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Confirm secret is plumbed
+        env:
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+        run: |
+          if [ -z "${VITE_SERVER_URL}" ]; then
+            echo "::error::VITE_SERVER_URL is empty"
+            exit 1
+          fi
+          echo "VITE_SERVER_URL length: ${#VITE_SERVER_URL}"
+        shell: bash
+      
       - name: Publish
         run: pnpm run publish
         env:
           PLATFORM: ${{ matrix.os }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+
+      
