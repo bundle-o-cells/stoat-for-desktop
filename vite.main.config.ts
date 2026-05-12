@@ -1,11 +1,9 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from "vite";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-
-  return {
-    define: {
-      __SERVER_URL__: JSON.stringify(env.VITE_SERVER_URL ?? "https://beta.revolt.chat"),
-    },
-  };
+export default defineConfig({
+  define: {
+    __SERVER_URL__: JSON.stringify(
+      process.env.VITE_SERVER_URL ?? "https://beta.revolt.chat"
+    ),
+  },
 });
