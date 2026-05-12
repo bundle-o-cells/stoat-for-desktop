@@ -1,16 +1,16 @@
-name: Build
+name: Publish Manual
 
 on:
-  push:
-    branches:
-      - dev
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build App
-    runs-on: ubuntu-latest
-
+  publish:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,7 +32,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
-        run: pnpm run package
+      - name: Publish
+        run: pnpm run publish
         env:
+          PLATFORM: ${{ matrix.os }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
