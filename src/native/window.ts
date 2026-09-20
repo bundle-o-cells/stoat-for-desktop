@@ -41,6 +41,7 @@ export function createMainWindow() {
   // (CLI arg --hidden or config)
   const startHidden =
     app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
+  const isMacOS = process.platform === "darwin";
 
   // create the window
   mainWindow = new BrowserWindow({
@@ -49,7 +50,9 @@ export function createMainWindow() {
     width: 1280,
     height: 720,
     backgroundColor: "#191919",
-    frame: !config.customFrame,
+    frame: isMacOS ? true : !config.customFrame,
+    titleBarStyle: isMacOS ? "hidden" : "default",
+    trafficLightPosition: isMacOS ? { x: 8, y: 8 } : undefined,
     icon: windowIcon,
     show: !startHidden,
     webPreferences: {
@@ -81,12 +84,14 @@ export function createMainWindow() {
   }
 
   // maximise the window if it was maximised before
-  if (config.windowState.isMaximised) {
+  if (config.windowState.isMaximised && !startHidden) {
     mainWindow.maximize();
   }
 
   // load the entrypoint
-  mainWindow.loadURL(BUILD_URL.toString());
+  mainWindow
+    .loadURL(BUILD_URL.toString())
+    .then(() => mainWindow.webContents.reload());
 
   // minimise window to tray
   mainWindow.on("close", (event) => {
@@ -197,12 +202,14 @@ export function createMainWindow() {
         .then((sources) => {
           // Shortcut for linux wayland.
           if (sources.length == 1) {
-            // TODO: Get audio to work with wayland
-            // See vencord for an implementation using a virtual microphone.
-            callback({
-              video: sources[0],
-              audio: request.audioRequested ? "loopbackWithMute" : undefined,
-            });
+            request.audioRequested
+              ? callback({
+                  video: sources[0],
+                  audio: "loopback",
+                })
+              : callback({
+                  video: sources[0],
+                });
             return;
           }
           ipcMain.once(
@@ -211,10 +218,14 @@ export function createMainWindow() {
               if (idx < 0 || idx > sources.length) {
                 callback({});
               } else {
-                callback({
-                  video: sources[idx],
-                  audio: audio ? "loopbackWithMute" : undefined,
-                });
+                audio
+                  ? callback({
+                      video: sources[idx],
+                      audio: "loopback",
+                    })
+                  : callback({
+                      video: sources[idx],
+                    });
               }
             },
           );

@@ -1,13 +1,31 @@
+import fs from "node:fs";
+import path from "node:path";
 import { IUpdateInfo, updateElectronApp } from "update-electron-app";
 
 import { BrowserWindow, Notification, app, shell } from "electron";
 import started from "electron-squirrel-startup";
 
-import { autoLaunch } from "./native/autoLaunch";
+import { initAutoLaunch } from "./native/autoLaunch";
 import { config } from "./native/config";
 import { initDiscordRpc } from "./native/discordRpc";
 import { initTray } from "./native/tray";
+import { initVirtualMic } from "./native/virtualMic";
 import { BUILD_URL, createMainWindow, mainWindow } from "./native/window";
+
+// In Flatpak, we have to update the temp dir to a shared directory across host and sandbox;
+// otherwise, the icon will not show up in the tray when using app indicators.
+if (process.platform === "linux" && process.env.FLATPAK_ID) {
+  const runtimeDir = process.env.XDG_RUNTIME_DIR;
+  if (runtimeDir) {
+    try {
+      const sharedTmpDir = path.join(runtimeDir, "app", process.env.FLATPAK_ID);
+      fs.mkdirSync(sharedTmpDir, { recursive: true });
+      process.env.TMPDIR = sharedTmpDir;
+    } catch (error) {
+      console.error("Failed to set up host-visible TMPDIR:", error);
+    }
+  }
+}
 
 // Squirrel-specific logic
 // create/remove shortcuts on Windows when installing / uninstalling
@@ -43,16 +61,17 @@ if (acquiredLock) {
     // create window and application contexts
     createMainWindow();
 
-    // enable auto start on Windows and MacOS
+    // save first launch state
     if (config.firstLaunch) {
-      if (process.platform === "win32" || process.platform === "darwin") {
-        autoLaunch.enable();
-      }
+      // Doesn't do anything right now. Used to enable auto start, but that behaviour was removed.
+      // Left in case it gets used in the future.
       config.firstLaunch = false;
     }
 
     initTray();
     initDiscordRpc();
+    initVirtualMic();
+    initAutoLaunch();
 
     // Windows specific fix for notifications
     if (process.platform === "win32") {

@@ -1,9 +1,15 @@
-name: Build
+name: Build & Lint
 
 on:
   push:
     branches:
-      - dev
+      - main
+    paths-ignore:
+      - ".github/**"
+      - "!.github/workflows/build.yml"
+      - ".vscode/**"
+      - ".gitignore"
+      - "README.md"
   pull_request:
 
 jobs:
@@ -14,25 +20,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Mise
+        uses: immich-app/devtools/actions/use-mise@7b8610a904d57da241e4ddba17fa62b62b15aed4 # use-mise-action-v2.0.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout assets
-        run: git -c submodule."assets".update=checkout submodule update --init assets
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
+        run: mise assets
 
       - name: Install dependencies
-        run: pnpm install
+        run: mise install:frozen
+
+      - name: Lint
+        run: mise lint
+
+      - name: Format
+        run: mise format
 
       - name: Build
-        run: pnpm run package
-        env:
-          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+        run: mise build
